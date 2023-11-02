@@ -1,0 +1,725 @@
+---
+title: "Biostats Cheat Sheet"
+author: 
+  - "Chris K-urine-c"
+  - "Umbrella Tamayonaise"
+editor: visual
+toc: true
+number-sections: true
+format: 
+  html: 
+    embed-resources: false
+    theme: default
+    code-fold: false
+    html-math-method: katex
+---
+
+```{r, echo = FALSE}
+library(ggplot2)
+diamonds |> 
+  ggplot(aes(x = cut, y = log(price), fill = cut)) +
+  geom_boxplot() +
+  theme_bw() +
+  scale_fill_discrete()
+```
+
+## Preface
+
+Hello! There are many different ways to do many different things. This cheat sheet is meant to help us get started with handling data. Some days it can be difficult to remember the expansive vocabulary that R uses, and some days we're just tired and our brains don't want to work. This guide is for those days, supplying a simple scaffolding to us to apply to our data so that we can actually use it. Again, there are many different ways to do many different things. Nothing in this document is right or wrong, but it is certainly something. Hopefully, that something is helpful.
+
+-Chris
+
+## How to use this guide
+
+This guide is written in something called a "Quarto" document. Quarto is an extension of R Markdown, which is R's way of combing a notepad which we can free type like this, with a runnable R script like this:
+
+```{r}
+print("Hello!")
+```
+
+The vast majority of this guide with be examples of different R vocabularies and functions that are commonly used for each process. Each process is represented by its own section, such as "Exploring Data". Many of these functions will repeat themselves in other sections, because there are no rules and I can do whatever I want.
+
+This guide WILL be using the tidyverse package, since many of the functions we have learned about come from those packages.
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+```
+
+Things that are NOT in this guide:
+
+1.  Stylistic choices
+2.  How to download R
+3.  How to find/ set a working directory
+4.  Precisely explaining what every function does
+5.  How to make your own Quarto document
+6.  Recipes for any kind of baked good
+
+## Functions and For-play
+
+Many of the codes within the guide are great on their own, but to save time and mental well-being we can combine many of these into our own functions and for loops that are specific to the problems we encounter within our specific datasets. In general, if you have to type a long sequence of code more than twice, just turn it into a function and call the function instead. These functions can also be used within loops and maps and you can generate some pretty creative solutions. Loops and maps are great for any monotonous task that nobody has time for, such as sampling 1000 times or running the same function over 150 different columns. These can get much more complicated and are worth playing around with.
+
+### Functions
+
+Functions help you do a lot of things in R. That's a pretty generic description, but basically you give R an input (could be x, but could be many different things), and R will give you whatever you want back. Honestly functions are super cool because you can do a lot of things with them. I'm sure there are much more sophisticated explanations out there, but the general format of a function in R is this: 
+
+```{r}
+fx <- function(x){   
+  fluff <- x^2 # can be whatever you want   
+  return(fluff) 
+}
+
+fx(4) # should give us 16 
+```
+
+### For Loops
+
+For loops help you run a function or desired manipulation across multiple values. This could be across multiple columns in a data set, which will save you a lot of time and stress in the long run, so you don't spend hours trying to do the same function over and over again.
+
+Here's the basic format:
+
+```{r}
+n <- 100 # n would be the number of times you want this loop to run.  
+
+for(i in 1:n){
+  random_vector <- c(3, 4, 5, 6, 7, 8, 9, 10)
+  new_thing <- sample(random_vector, size = 2, replace = T)
+  do_something <- sum(new_thing)^2
+  return(do_something)
+  }
+
+print(do_something)
+```
+
+This will run 100 samples from this vector and sum & square them. Not a very practical or useful example, but this just shows you what functions can do! You can put whatever your heart desires into those little brackets.
+
+## Finding a Dataset
+
+You don't have to harass a bunch of physicians in order to find a data et. In face, you really can just google them. Here are some websites to find all the datasets you could ever want:
+
+1.  Kaggle
+    1.  <https://www.kaggle.com/>
+2.  Google Datasets
+    1.  <https://datasetsearch.research.google.com/>
+3.  GitHub
+    1.  <https://github.com/>
+4.  Gumnit Data
+    1.  <https://data.gov/>
+5.  NASA data
+    1.  <https://data.nasa.gov/browse?limitTo=datasets>
+
+**If you have found a data set and don't know where to start, just go through these sections in order. You likely won't need every function for every data set and you may need more.**
+
+### Reading in your data
+
+Once you have your data (usually an excel or csv file), there are a few ways you can read it into your R script. There are some data sets already pre-loaded into the R universe, such as the diamonds data set that we often use in Biostats. I think csv files are superior to excel files, but I can't honestly explain why, you could probably look it up though. My favorite ways to load in data are these:
+
+```{r}
+# Read in as a tibble
+diamond_tibble <- read_csv("diamond.csv")
+# when you use read_csv with an underscore, it's a tibble. WILD 
+
+# Read in as a data frame
+diamond_df <- read.csv("diamond.csv")
+# when you read in read.csv with a period, it's a DATAFRAME. WILD
+```
+
+Also, if you want to know the difference between tibbles and data frames, look it up in the textbook!
+
+### Importing from Excel
+
+Sometimes the dataset that you're looking at is not readily available as a csv, but it is as an Excel file (xlsx). Sure, you could open it in excel, clean it up, and convert it to a csv, but that's one too many steps for me. I would recommend cleaning up the rows and columns in excel first, however. Many excel files have the first several rows as different labels cover many different columns, and sometimes they don't even start at the top right cell and the entire dataset is randomly in the center of the spreadsheet. You can fix this in R, but excel is much quicker if you can since you can just drag and select the data you want then save that data as another xlsx file. Then you can import into R!
+
+First, make sure you set your working directory where it needs to be. Then, click the "Files" tab (in the lower right quadrant of RStudio by default).
+
+![](images/Screenshot%202023-11-01%20115929.png)
+
+Here, you'll see all of the files within your current working directory. You can move in and out of this directory to find the data set you want if needed. Once you find your xlsx file, click it and select "Import Dataset".
+
+![](images/Screenshot%202023-11-01%20120300.png)
+
+This will pull up a large pop-up menu. This menu will provide a preview of how R thinks the excel file should look in R. Pay attention to the rows and columns in the preview. If the excel file had many different section headers, this file may look wonky and you may need to rearrange it in excel first. Remember that R can also make the first column the row names, so if that column existed in excel you may end up with 2 columns of called No. containing 1, 2, 3, 4, and so on.
+
+In the bottom right of this pop-up, you will find the R code to copy and paste into your R script in order to import the xlsx file. I prefer to copy the code, close out of the window, and paste directly into my script. You could also just click "Import" in the bottom right, but that will only load your data into your environment and you will not have any code written to reset it if needed.
+
+![](images/Screenshot%202023-11-01%20120448.png)
+
+And that's it! Now you can run the code provided to import your Excel file and have so much fun. All of your friends will be jealous, and you can sell them this information for money, thus solving any financial problems too. Its the gift that just keeps giving.
+
+## Exploring Data
+
+Exploring your data does not refer to anything complicated. This is the first step after downloading your data set. We need to look at it, and see what the heck is going on in there. Looking at our data, we want to understand how many rows and columns there are, what classes (numerical, categorical, factor, etc.) are our variables, how many unique observations are there, what different names are used throughout the data, and so on. If we do not know what our data looks like, it will be pretty difficult to know what to do next.
+
+So here's some common functions we can use for this:
+
+### Looking at the data
+
+```{r}
+# View the entire dataset in another window
+View(diamonds)
+
+# View the first 6 rows of a dataset
+head(diamonds)
+
+# View the last 6 rows of a dataset
+tail(diamonds)
+
+# List of variables with additional info by class
+summary(diamonds)
+```
+
+### Structure of the data
+
+```{r}
+# View a list of all variables with variable type
+glimpse(diamonds)
+
+# View a list of all variables with variable class
+str(diamonds)
+
+# View the total number of rows and columns
+dim(diamonds)
+
+# View the total number of columns
+length(diamonds)
+
+# View the total number of columns
+ncol(diamonds)
+
+# View the total number of rows
+nrow(diamonds)
+```
+
+### Class and names of variables
+
+```{r}
+# View the variable names of a dataset. Can be used on a vector
+names(diamonds)
+
+# View the class of a variable, such as numerical or factor
+class(diamonds$carat)
+
+# View all values without repeats
+unique(diamonds$cut)
+```
+
+### Tables and plots of data
+
+```{r}
+# Plot a table of counts with totals added
+diamonds |> 
+  select(cut, color) |> 
+  table() |> 
+  addmargins()
+
+# Plot a table of proportions 
+diamonds$cut |> 
+  table() |> 
+  prop.table()
+
+# Plot a histogram of a continuous variable to check distribution
+diamonds |> 
+  ggplot(aes(x = log(price))) +
+  geom_histogram(binwidth = 0.3, 
+                        color = "black", 
+                        fill = "turquoise") +
+  labs(title = "On the 'Gram", x = "log(price)", y = "Count") +
+  theme_bw()
+
+# Plot a bar plot of a categorical variable to check distribution
+diamonds |> 
+  ggplot(aes(x = cut)) +
+  geom_bar(fill = "lightblue", color = "black") +
+  labs(title = "At the Bar", x = "Cut", y = "Count") +
+  theme_bw()
+```
+
+## Cleaning Data
+
+Unfortunately, this step does not include soap. But that shouldn't stop you from using any. Clean data is the data that you want. All of the variables are the correct class, any missing or duplicate data is identified and addressed, any values that need to be re-coded are taken care of, and that we're left with data that we actually care about. Well, as much as a person "could" care about data.
+
+Anyways, more functions:
+
+### Identifying variable types and class
+
+```{r}
+# View a list of all variables with variable class
+glimpse(diamonds)
+
+# View the class of a variable or dataframe
+class(diamonds$carat)
+
+# View the unique levels within an ordinal factor. 
+# The order of these levels matter
+levels(diamonds$cut)
+
+# View the non-repeating unique values
+unique(diamonds$cut)
+```
+
+### Choosing the data we want
+
+```{r}
+# Only selects the variables chosen
+diamonds |> 
+  select(cut, color)
+
+# Only considers observations which meet the criteria specified
+diamonds |> 
+  filter(color == "D", carat >= mean(carat))
+
+# Shows the non-repeating values 
+unique(diamonds$clarity)
+
+# Randomly selects values of the size and distribution specified. 
+# "replace" determines whether a value can occur more than once. 
+diamonds$carat |> 
+  sample(size = 5, replace = TRUE)
+```
+
+### Duplicated data
+
+```{r}
+# Creates a vector with a value occuring more than once
+example.vector <- c(1, 1, 2, 3, 4)
+
+# Gives a logical answer to whether a value has occured before
+duplicated(example.vector)
+
+# Gives all non-repeating values
+unique(example.vector)
+```
+
+### Recoding data
+
+```{r}
+# Re-labels values from the old value, to the new
+recode(example.vector, "1" = 7)
+```
+
+### Addressing NAs:
+
+Missing values are about as complicated as you want them to be. For that reason, I will NOT be going over how to decide whether your data is missing completely at random (MCAR), missing at random (MAR), missing not at random (MNAR), or what the best practice for imputation will be for your specific data set. In general, NAs are either removed, imputed by the mean, replaced by the value before or after it, or predicted using the information around it (pmm, knn, rf, "mice" package, etc.). Look these strategies up at your own risk, it'll take your entire weekend.
+
+### Identifying NAs
+
+```{r}
+# Creates a vector with 3 NAs
+example.vector <- c(NA, 2, 3, NA, 4, 5, NA)
+
+# Counts the total number of NAs in the vector
+sum(is.na(example.vector))
+
+# Shows which cell the NAs are located
+which(is.na(example.vector))
+```
+
+### Removing NAs
+
+```{r}
+# Shows only the observations without NAs (specify [row, col] if using dataframe)
+example.vector[complete.cases(example.vector)]
+
+# Another way to show only the observations without NAs
+example.vector[!is.na(example.vector)]
+```
+
+### Simple mean imputation
+
+```{r}
+# Identifies the mean of our vector WITHOUT NAs
+mean(example.vector[!is.na(example.vector)])
+
+# Overwrites the NAs in our vector with the value determined above
+example.vector[is.na(example.vector)] <- 
+  mean(example.vector[!is.na(example.vector)])
+
+example.vector
+```
+
+### Replacing NAs with last/ next observation
+
+```{r}
+#The fill() function only works on a dataframe. So we create one
+example.vector <- as.data.frame(c(NA, 2, 3, NA, 4, 5, NA))
+example.vector |> 
+    colnames() <- "example"
+
+example.vector
+```
+
+In the "fill" function, direction determines whether values are carried from above or below. In this case, The NAs are replaced with the value above it (down) first, leaving only the first NA. Then, the NAs are replaced with the value below it (up) in order to ensure no leading or trailing NAs. This also works on blank cells.
+
+```{r}
+example.vector |> 
+  fill(everything(), .direction = "downup") 
+```
+
+Prediction with KNN, RF, PMM, etc. is waaaay beyong this guide.
+
+## Manipulating Data
+
+We shouldn't judge a book by a cover. Unless its a data set, and we need the tools to set them straight. Manipulating data is self-explanatory. We take what data we have, and smack it around until it gives us the answers we need. This includes renaming, reordering, changing class, selecting, re-coding, changing, joining, and reshaping data.
+
+No functions this time. You've had enough.
+
+Just kidding, they're right here:
+
+### Changing variable class
+
+```{r}
+# Create a new version any time you plan on making permanent changes
+diamonds2 <- diamonds
+
+# Changes cut from a categorical variable to a factor with ordinal levels
+diamonds2$cut <- as.factor(diamonds2$cut)
+
+# Shows the class of the cut variable
+class(diamonds2$cut)
+
+# Shows the different levels of the cut variable. The order here matters. 
+levels(diamonds2$cut)
+
+# Changing the levels and labels of the cut variable. The order here matters.
+diamonds2 <- diamonds2 |> 
+  mutate(cut = factor(cut,
+                      levels = c("Fair", "Good", "Very Good", "Ideal", "Premium"),
+                      labels = c("Gross", "Icky", "Okay-ish", "Meh", "Sparkly")))
+
+diamonds2
+```
+
+### Renaming columns
+
+```{r}
+# Rename variables by defining the new name first, then the old
+diamonds2 |> 
+  rename("slice" = "cut")
+```
+
+### Reordering columns
+
+```{r}
+# The select function will always pull variables in the order you define
+diamonds2 |> 
+  select(cut, clarity, everything())
+```
+
+### Selecting, Filtering, and Arranging
+
+```{r}
+# You can combine selecting, filtering, and arranging using pipes
+diamonds2 |> 
+  select(cut, price) |> 
+  filter(cut == "Okay-ish") |> 
+  arrange(desc(price))
+```
+
+### Re-coding values
+
+```{r}
+# Recoding values can change the value to something more useful
+diamonds2$color <- diamonds2$color |> 
+  recode("E" = "blue")
+
+diamonds2
+```
+
+### Changing data with mutate
+
+```{r}
+# Mutate can create a new variable, or change an existing one
+diamonds2 |> 
+  mutate(carrot = carat) |> 
+  mutate(carat = mean(carat))
+
+# Mutate can be combined with other functions to make life easier
+diamonds2 |> 
+  mutate(across(where(is.numeric), mean))
+```
+
+### Conditional changes with ifelse
+
+"ifelse" takes a condition you define as the "test" argument, and if the value meets those conditions it alters the value as you define it with the "yes" argument. If the value does not meet those conditions, it alters the value based upon how you defined the "no" argument.
+
+```{r}
+diamonds2 |> 
+   mutate(price = (ifelse(
+     test = price >= median(price), 
+     yes = "Can't Afford", 
+     no = "Still Can't Afford")))
+```
+
+Use "case_when" for multiple conditions at once. Note the syntax is different. The condition is on the left side of the \~ and if TRUE the values will be replaced by the right side of the \~. The final arugment "TRUE" specifies that if a value did not meet any of the conditions above, then replace it with whatever is right of the final \~.
+
+```{r}
+diamonds2 |> 
+  mutate(price = case_when(
+  price < quantile(price, probs = 0.33) ~ "FREE",
+  price < quantile(price, probs = 0.66) ~ "BUY NOW",
+  price < quantile(price, probs = 1) ~ "SELL NOW",
+  TRUE ~ "NA"))
+```
+
+### Applying changes across a dataset
+
+```{r}
+# You can use a for loop for monotonous tasks like replacing every value with SPAM
+for (i in seq_along(diamonds2)) {
+  diamonds2[[i]] <- paste("SPAM")
+}
+
+diamonds2
+
+# You can also use maps in a similar way, turning every value lower case
+map_df(diamonds2, tolower)
+```
+
+### Reshaping using pivots
+
+```{r}
+# Creates a data frame from class
+stocks <- data.frame(
+     time = as.Date('2009-01-01') + 0:9,
+     X = rnorm(10, 0, 1),
+     Y = rnorm(10, 0, 2),
+     Z = rnorm(10, 0, 4)
+)
+```
+
+Select which columns to pivot longer with "cols". The names of those columns will then go into a new column specified under "names_to". The values within the old columns will go into their own new column specified with "values_to".
+
+```{r}
+stocks <- stocks |> 
+  pivot_longer(cols = c(X, Y, Z),
+               names_to = "stonks",
+               values_to = "price")
+
+stocks
+```
+
+Similarly in pivot_wider, the "names_from" will take the values of whatever column you choose and create new columns for every value within. In this case, the new columns will be called X, Y, and Z. The "values_from" argument will take every value from the column you choose and fill the new columns created by "names_from" with those values. In this case, the associated price will be listed under each of X, Y, and Z.
+
+```{r}
+stocks <- stocks |> 
+  pivot_wider(names_from = stonks,
+              values_from = price)
+
+stocks
+```
+
+## Describing and Summarizing Data
+
+These steps are beginning to get more and more self-explanatory. The goal here is to use descriptive statistics to "describe" the data that we want to analyze. Shocking, I know. The statistics we're looking for describe the range/spread, centrality, and variance of the data. These statistics can be summarized using the usual summary function, but also by using tables.
+
+And now functions:
+
+### Range and spread
+
+```{r}
+# View the lowest and highest value 
+range(diamonds$carat)
+
+# View the lowest value
+min(diamonds$carat)
+
+# View the highest value
+max(diamonds$carat)
+
+# Create a summary of your choosing 
+diamonds |> 
+  group_by(cut) |> 
+  summarize(meanPrice = mean(price)) |> 
+  arrange(-desc(meanPrice))
+```
+
+### Centrality
+
+```{r}
+# View the average 
+mean(diamonds$carat)
+
+# View the median 
+median(diamonds$carat)
+
+# View a large summary with quantiles and medians for continuous data
+summary(diamonds$carat)
+```
+
+### Variance and standard deviation
+
+```{r}
+# View the variance 
+var(diamonds$carat)
+
+# View the standard deviation
+sd(diamonds$carat)
+```
+
+## Visualizing Data
+
+Obviously this refers to plots, which means ggplot2 is coming. We want to tell a story with our data, and that comes from visualization. It becomes more and more difficult as you progress through these sections to be able to explain exactly what to do, as by this point your data is already unique to you. What I can do, is to help decide which plot to use depending on the types of variables that you're left with at this point.
+
+Below is a list of scenarios and some options for which plots to use:
+
+### Single numerical variable only
+
+```{r}
+# Creates a histogram
+diamonds |> 
+  ggplot(aes(x = carat)) +
+  geom_histogram(fill = "orange", color = "black") +
+  labs(title ="Histogram", x = "Carrot", y = "Count") +
+  theme_bw()
+
+# Creates a density plot
+diamonds |> 
+  ggplot(aes(x = log(price))) +
+  geom_density(fill = "pink") +
+  labs(title = "Dense", x = "Cost", y = "Frequency") +
+  theme_bw()
+```
+
+### Single categorical only
+
+```{r}
+# Creates a bar plot
+diamonds |> 
+  ggplot(aes(x = cut)) +
+  geom_bar(fill = "green", color = "black") +
+  labs(title = "Bars", x = "Cuts", y = "Count") +
+  theme_minimal()
+```
+
+### Multiple categorical only
+
+```{r}
+# Creates a stacked bar plot
+diamonds |> 
+  ggplot(aes(x = cut, fill = color)) +
+  geom_bar(position = "stack") +
+  labs(title = "Bars", x = "Cuts", y = "Count") +
+  theme_bw() + 
+  scale_fill_discrete()
+```
+
+### One numerical and one or more categorical
+
+```{r}
+# Creates a box plot
+diamonds |> 
+  ggplot(aes(x = cut, y = log(price), fill = cut)) +
+  geom_boxplot() +
+  labs(title = "Boxes", x = "Cut", y = "log(price)") +
+  facet_wrap(~ clarity) +
+  theme_bw() + 
+  scale_fill_discrete()
+```
+
+### One or more numerical and one or more categorical
+
+```{r}
+# Creates a scatterplot
+diamonds |> 
+  ggplot(aes(x = log(carat), y = price, color = cut)) +
+  geom_point() +
+  labs(title = "Points", x = "log(carat)", y = "Price") +
+  theme_bw() + 
+  scale_fill_continuous()
+```
+
+## Analyzing Data
+
+Finally. The end. Both of writing this guide, but also of your quest for usable data. Analyzing data is the generally the end goal of everything. We form a research question, and use analysis to get some insight on the question. There are as many different analyses as you can think of, then there will be even more because someone probably invented one while you were counting. I'll only list the few we've gone over in class. What's important when deciding which analysis to use is to make sure you understand the assumptions behind every test, and which test applies to which combinations of variables.
+
+We'll start with the T-Test:
+
+### T-Test
+
+```{r}
+t.test(diamonds$carat)
+
+with(diamonds, t.test(carat, price, alternative = "two.sided"))
+```
+
+Assumptions:
+
+1.  Data is randomly distributed
+2.  Data is continuous or 2 level categorical
+3.  Homogeneity of variance
+4.  Distribution is approximately normal/ t-distribution
+
+### ANOVA
+
+```{r}
+with(diamonds, lm(price ~ cut)) |> 
+  summary()
+
+with(diamonds, aov(price ~ clarity)) |> 
+  summary()
+```
+
+Assumptions:
+
+1.  Normal distribution
+2.  Homogeneity of variance
+3.  Independent observations
+
+### Linear Regressions
+
+```{r}
+with(diamonds, lm(price ~ carat + cut + color)) |> 
+  summary()
+```
+
+Assumptions:
+
+1.  There should be a linear relationship between variables
+2.  Independent variables should not be correlated
+3.  Multivariate normality
+4.  Homogeneity of variance
+5.  No multicollinearity of variables
+
+### Chi-Square test
+
+```{r}
+with(diamonds, chisq.test(table(cut)))
+
+diamonds |> 
+  select(cut, clarity) |> 
+  table() |> 
+  chisq.test()
+```
+
+Assumptions:
+
+1.  Data in cells should be frequencies
+2.  Expected frequencies must be greater than 5 per cell in 80% of cells
+3.  Levels within variables must be mutually exclusive
+4.  Each observation can only contribute to a single cell
+5.  Groups must be independent
+6.  Data must be categorical or ordinal
+
+### Logistic Regression
+
+```{r}
+new.diamonds <- diamonds |> 
+  mutate(binary = sample(rep(c(F, T)), 
+                         size = nrow(diamonds), 
+                         replace = T))
+
+with(new.diamonds, glm(binary ~ cut + price, family = binomial)) |> 
+  summary()
+```
+
+Assumptions:
+
+1.  Binary logistic regression requires a binary dependent variable
+2.  Ordinal logistic regression requires (gasp) an ordinal dependent variable
+3.  Observations must be disjoint
+4.  Little to no multicollinearity among independent variables
+5.  Assumes linearity of independent variables and log odds, but not linearity of independent variables with dependent variable
+6.  Expected probability of all independent variables must be at least 10%
+
+## Conclusion
+
+There is no conclusion. This is not a complete collection nor a guarantee of success with anything you might be doing. This is a random assortment of R-related functions to hopefully get us started. You may use everything in this guide, you may use nothing. Either way, this document should provide a framework to build upon throughout your struggles with data. So in conclusion, that is all.
